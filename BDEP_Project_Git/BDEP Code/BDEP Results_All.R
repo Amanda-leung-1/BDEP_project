@@ -7,9 +7,10 @@ library(weathercan)
 library(dygraphs)
 library(xts)
 library(htmltools)
+
 #import and retrieve raw data logger data. Convert dates to format y-m-d H:M
 # Convert date columns to POSIXct format
-soil_data <- read.csv("Files/Data_Loggers.csv", header = TRUE)
+soil_data <- read.csv("Data_Loggers.csv", header = TRUE)
 date_columns <- paste0("Date_SM", 1:6)
 soil_data[date_columns] <- lapply(soil_data[date_columns], as.POSIXct, format = "%Y-%m-%d %H:%M")
 # Convert depth columns to numeric
