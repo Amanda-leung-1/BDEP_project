@@ -1,0 +1,17 @@
+﻿Depth ,SM1,SM2,SM3,SM4,SM5,SM6
+15,15.9,7.5,15.9,15.9,15,15
+30,31.8,15.0,31.8,31.8,30,30
+45,47.7,22.5,47.7,47.7,45,45
+60,63.6,30.0,63.6,63.6,60,60
+75,79.5,37.5,79.5,79.5,75,75
+90,95.5,45.0,95.5,95.5,90,90
+105,111.4,52.5,111.4,111.4,-,-
+120,127.3,60.0,127.3,127.3,-,-
+,,,,,,
+Sensor Name,BDEP Site Number,Sensor Length,General orientation,,,
+BDEP-SM1,Site 1-3,1.2m,Approximately 45 degrees into the bank,,,
+BDEP-SM2,Site 1-3,1.2m,approximately horizontal,,,
+BDEP-SM3,Site 2-2B,1.2m,Approximately 45 degrees into the bank,,,
+BDEP-SM4,Site 2-2B,1.2m,Approximately 45 degrees into the bank,,,
+BDEP-SM5,Site 4-2,0.9m,approximately vertical,,,
+BDEP-SM6,Site 4-3,0.9m,approximately vertical,,,
