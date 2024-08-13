@@ -4,60 +4,12 @@ library(htmltools)
 
 
 highlight_periods <- list(
-  list(from = as.Date("2020-05-01"), to = as.Date("2020-10-31")),
-  list(from = as.Date("2021-05-01"), to = as.Date("2021-10-31")),
-  list(from = as.Date("2022-05-01"), to = as.Date("2022-10-31")),
-  list(from = as.Date("2023-05-01"), to = as.Date("2023-10-31")),
-  list(from = as.Date("2024-05-01"), to = as.Date("2024-10-31"))
+  list(from = as.Date("2020-04-01"), to = as.Date("2020-10-31")),
+  list(from = as.Date("2021-04-01"), to = as.Date("2021-10-31")),
+  list(from = as.Date("2022-04-01"), to = as.Date("2022-10-31")),
+  list(from = as.Date("2023-04-01"), to = as.Date("2023-10-31")),
+  list(from = as.Date("2024-04-01"), to = as.Date("2024-10-31"))
 )
-
-plot_soil_moisture <- function(sensor_data, precipitation_data, sensor, start_date, end_date) {
-  title_string <- sprintf("Soil moisture for %s", sensor)
-  # Clean NA values from the sensor data and assign to a new variable
-  sensor_cleaned <- na.omit(sensor_data)
-  sensor<-sensor
-  # Convert sensor data to an xts object for plotting with dygraph
-  sensor_xts <- xts(
-    x = sensor_cleaned[, paste0(sensor, "_Depth", c(15, 30, 45, 60, 75, 90, 105, 120))],
-    order.by = sensor_cleaned[, paste0("Date_", sensor)]
-  )
-  
-  # Convert percipitation to an xts object for plotting with dygraph 
-  Precipitation_xts <- xts(
-    x = precipitation_data[, "precip_amt"],
-    order.by = precipitation_data$time
-  )
-  
-  # Subset Precipitation_xts and sensor_xts to the common date range
-  Precipitation_xts_subset <- Precipitation_xts[index(Precipitation_xts) >= start_date & index(Precipitation_xts) <= end_date, ]
-  sensor_xts_subset <- sensor_xts[index(sensor_xts) >= start_date & index(sensor_xts) <= end_date, ]
-  
-  # Create a list of dygraphs objects
-  plotobj <- list(
-    dygraphs::dygraph(Precipitation_xts_subset, group=sensor, main=title_string, height=200) %>%
-      dySeries("precip_amt", label = "Precipitation (mm)") %>%
-      dyOptions(drawAxes = FALSE) %>%  # Hide both x and y axes
-      dyAxis("y", label = "Precipitation (mm)", valueRange = c(10, 0)),  # Adjust y-axis options as needed
-    dygraphs::dygraph(sensor_xts_subset, group=sensor, main=title_string) %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth15"), label = "Depth 15") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth30"), label = "Depth 30") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth45"), label = "Depth 45") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth60"), label = "Depth 60") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth75"), label = "Depth 75") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth90"), label = "Depth 90") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth105"), label = "Depth 105") %>%
-      dygraphs::dySeries(paste0(sensor, "_Depth120"), label = "Depth 120") %>%
-      dygraphs::dyOptions(drawGrid = FALSE, stackedGraph = FALSE, colors = RColorBrewer::brewer.pal(8, "Set2"))%>%
-      dygraphs::dyAxis("y", label = "Soil Moisture Index") %>%
-      dygraphs::dyLegend(show = "always") %>%
-      dygraphs::dyRangeSelector() %>%
-      dyHide() %>%
-      dygraphs::dyOptions(digitsAfterDecimal = 2, axisLabelFontSize = 14)
-  )  # end list
-  
-  # Render the dygraphs objects using htmltools
-  htmltools::browsable(htmltools::tagList(plotobj))
-}
 
 #function to plot the HOURLY timestep for soil moisture 
 plot_soil_moisture <- function(sensor_data, precipitation_data, sensor, start_date, end_date, label) {
@@ -118,7 +70,7 @@ plot_soil_moisture(SM4, yyc, "SM4", as.POSIXct('2020-01-01'), as.POSIXct('2025-0
 
 
 
-plot_soil_moisture_weekly <- function(sensor_data, precipitation_data, sensor, start_date, end_date, label) {
+plot_soil_moisture_weekly_SM1to4 <- function(sensor_data, precipitation_data, sensor, start_date, end_date, label) {
   title_string <- sprintf("Soil moisture for %s", sensor)
   # Clean NA values from the sensor data and assign to a new variable
   sensor_cleaned <- na.omit(sensor_data)
@@ -172,12 +124,64 @@ plot_soil_moisture_weekly <- function(sensor_data, precipitation_data, sensor, s
   # Render the dygraphs objects using htmltools
   htmltools::browsable(htmltools::tagList(plotobj))
 }
+plot_soil_moisture_weekly_SM5to6 <- function(sensor_data, precipitation_data, sensor, start_date, end_date, label) {
+  title_string <- sprintf("Soil moisture for %s", sensor)
+  # Clean NA values from the sensor data and assign to a new variable
+  sensor_cleaned <- na.omit(sensor_data)
+  sensor<-sensor
+  # Convert sensor data to an xts object for plotting with dygraph
+  sensor_xts <- xts(
+    x = sensor_cleaned[, paste0(sensor, "_Depth", c(15, 30, 45, 60, 75, 90))],
+    order.by = sensor_cleaned$Date
+  )
+  # Convert percipitation to an xts object for plotting with dygraph 
+  Precipitation_xts <- xts(
+    x = precipitation_data[, "precip_amt_mean"],
+    order.by = precipitation_data$week_start
+  )
+  # Subset Precipitation_xts and sensor_xts to the common date range
+  Precipitation_xts_subset <- Precipitation_xts[index(Precipitation_xts) >= start_date & index(Precipitation_xts) <= end_date, ]
+  sensor_xts_subset <- sensor_xts[index(sensor_xts) >= start_date & index(sensor_xts) <= end_date, ]
+  
+  depth_label <- label[[sensor]]
+  # Create a list of dygraphs objects
+  plotobj <- list(
+    htmltools::tags$div(style = "margin-left: 10px;",  # Adjust the value as needed
+                        dygraphs::dygraph(Precipitation_xts_subset, group=sensor, main=title_string, height=200) %>%
+                          dySeries("precip_amt_mean", fillGraph = TRUE, label = "Precipitation (mm)") %>%
+                          dyAxis("y", label = "Precipitation (mm)", valueRange = c(50, 0), pixelsPerLabel = 40)  # Adjust y-axis options as needed
+    ),
+    dygraphs::dygraph(sensor_xts_subset, group=sensor) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth15"), label = paste0("Depth_",depth_label[1])) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth30"), label = paste0("Depth_",depth_label[2])) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth45"), label = paste0("Depth_",depth_label[3])) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth60"), label = paste0("Depth_",depth_label[4])) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth75"), label = paste0("Depth_",depth_label[5])) %>%
+      dygraphs::dySeries(paste0(sensor, "_Depth90"), label = paste0("Depth_",depth_label[6])) %>%
+      dygraphs::dyOptions(drawGrid = TRUE, stackedGraph = FALSE, 
+                          digitsAfterDecimal = 2, axisLabelFontSize = 14,
+                          pointSize = 2, drawPoints = TRUE,
+                          colors = RColorBrewer::brewer.pal(8, "Set2"))%>%
+      dygraphs::dyAxis("y", label = "Soil Moisture Index", pixelsPerLabel = 40) %>%
+      dygraphs::dyLegend(show = "always") %>%
+      dygraphs:: dyShading(from = highlight_periods[[1]]$from, to = highlight_periods[[1]]$to, color = "lightgray") %>%
+      dygraphs:: dyShading(from = highlight_periods[[2]]$from, to = highlight_periods[[2]]$to, color = "lightgray")%>%
+      dygraphs:: dyShading(from = highlight_periods[[3]]$from, to = highlight_periods[[3]]$to, color = "lightgray")%>%
+      dygraphs:: dyShading(from = highlight_periods[[4]]$from, to = highlight_periods[[4]]$to, color = "lightgray")%>%
+      dygraphs:: dyShading(from = highlight_periods[[5]]$from, to = highlight_periods[[5]]$to, color = "lightgray")%>%
+      dygraphs::dyRangeSelector(dateWindow = c(start_date, end_date))%>%  # Set initial date window using JavaScript Date format
+      dyHide()
+  )  # end list
+  
+  # Render the dygraphs objects using htmltools
+  htmltools::browsable(htmltools::tagList(plotobj))
+}
 
 
-plot_soil_moisture_weekly(SM1_weekly, yyc_weekly, "SM1", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
-plot_soil_moisture_weekly(SM2_weekly, yyc_weekly, "SM2", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
-plot_soil_moisture_weekly(SM3_weekly, yyc_weekly, "SM3", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
-plot_soil_moisture_weekly(SM4_weekly, yyc_weekly, "SM4", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
+plot_soil_moisture_weekly_SM1to4(SM1_weekly, yyc_weekly, "SM1", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
+plot_soil_moisture_weekly_SM1to4(SM2_weekly, yyc_weekly, "SM2", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
+plot_soil_moisture_weekly_SM1to4(SM3_weekly, yyc_weekly, "SM3", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
+plot_soil_moisture_weekly_SM1to4(SM4_weekly, yyc_weekly, "SM4", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
 
-plot_soil_moisture_weekly(SM5_weekly, yyc_weekly, "SM5", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'))
-plot_soil_moisture_weekly(SM6_weekly, yyc_weekly, "SM6", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'))
+plot_soil_moisture_weekly_SM5to6(SM5_weekly, yyc_weekly, "SM5", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)
+plot_soil_moisture_weekly_SM5to6(SM6_weekly, yyc_weekly, "SM6", as.POSIXct('2020-07-01'), as.POSIXct('2024-08-01'), true_depth)

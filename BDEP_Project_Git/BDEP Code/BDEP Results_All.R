@@ -73,7 +73,7 @@ SM6_weekly <- calculate_weekly_mean(SM6, "SM6")
 
 
 
-true_depth <- read.csv("Files/BDEP_TrueDepth.csv", header = TRUE) %>%
+true_depth <- read.csv("BDEP_TrueDepth.csv", header = TRUE) %>%
   slice(1:8) %>%
   mutate(across(everything(), ~ as.numeric(as.character(.))))%>%
   mutate(across(everything(), ~ round(., 0)))
