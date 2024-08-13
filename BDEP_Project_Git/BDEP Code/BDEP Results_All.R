@@ -1,3 +1,4 @@
+#download all necessary libraries 
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
@@ -8,16 +9,21 @@ library(dygraphs)
 library(xts)
 library(htmltools)
 
-#import and retrieve raw data logger data. Convert dates to format y-m-d H:M
-# Convert date columns to POSIXct format
+#import and retrieve raw data logger data. 
 soil_data <- read.csv("Data_Loggers.csv", header = TRUE)
+
 date_columns <- paste0("Date_SM", 1:6)
+
+# Convert date columns to POSIXct format y-m-d H:M
 soil_data[date_columns] <- lapply(soil_data[date_columns], as.POSIXct, format = "%Y-%m-%d %H:%M")
+
 # Convert depth columns to numeric
 depth_columns <- paste0("SM", 1:6, "_Depth15")
 soil_data[depth_columns] <- sapply(soil_data[depth_columns], as.numeric)
 
-#create individual dataframes for each data logger
+#create individual data frames for each data logger, because the csv file contains data for all 6 loggers in 1 tab.
+#whenever new data is collected from the data loggers, this csv file will need to be updated, and the code will need to be re-run
+#the rows for each data were selected, so there are no blank cells selected for the data frame 
 SM1 <- select(soil_data,1:15)
 SM1 <- SM1[1:89977,]
 SM2 <- select(soil_data,17:31)
@@ -31,11 +37,12 @@ SM5 <- SM5[1:16688,]
 SM6 <- select(soil_data, 78:88)
 SM6 <- SM6[1:14616,]
 
-#Station name = Calgary INT'L CS
+#collecting historical percipitation data for calgary- Station name = Calgary INT'L CS
 yyc <- weather_dl(station_ids = "27211", start = "2020-07-01", end = "2024-08-09", interval = "hour") %>%
   select(time, precip_amt)
 print("the data has been compiled")
 
+#aggregate data in a weekly timsteap instead of daily 
 yyc_weekly <- yyc %>%
   mutate(week_start = floor_date(time, "week")) %>%
   group_by(week_start) %>%
